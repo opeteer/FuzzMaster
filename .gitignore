@@ -13,3 +13,7 @@ anvil_env/.anvil.pid
 anvil_env/broadcast/**/run-*.json
 anvil_env/cache/
 
+
+# External benchmark datasets (local clones)
+/SC-Bench/
+/smartbugs-curated/
