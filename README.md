@@ -1,59 +1,78 @@
-## 🔧 Build from Source and Run Tests
+# CMAB-Anvil: Contextual Multi-Armed Bandit Smart Contract Fuzzing & Exploration Framework
 
-1. **Install Rust**
-   Visit [https://rustup.rs/](https://rustup.rs/) and follow the instructions to install Rust and Cargo.
+Framework penelitian berbasis **Contextual Multi-Armed Bandits (CMAB)** untuk eksplorasi, fuzzing interaksi, dan deteksi anomali pada *smart contract* berbasis EVM di atas lingkungan simulator lokal **Anvil (Foundry)**.
 
-2. **Install Dependencies**
-   Make sure the following packages are installed:
+Repositori ini mereformulasi permasalahan interaksi kontrak dari agen *unprivileged user* (pengguna biasa tanpa hak akses `owner`/admin) menggunakan algoritma **Disjoint LinUCB** (stasioner) dan **Discounted LinUCB / D-LinUCB** (adaptif terhadap lingkungan non-stasioner).
 
-   * `libssl-dev` (OpenSSL)
-   * `libz3-dev`
-   * On Linux, you will likely also need **Clang ≥ 12.0.0**. Set it as your C compiler using:
+---
 
-     ```bash
-     export CC=clang
-     export CXX=clang++
-     ```
+## 📁 Struktur Proyek
 
-3. **Build the Project**
-   Use Cargo to build the project. This may take several seconds to several minutes depending on your system:
+```text
+.
+├── cmab_anvil/                  # Core framework CMAB & skrip benchmark penelitian
+│   ├── algorithms/              # Implementasi algoritma CMAB (Base, LinUCB, Discounted LinUCB)
+│   ├── Agen_Vault_Custody/      # Domain agen spesialis Vault & Custody (context, arms, reward, agent)
+│   ├── common/                  # Unprivileged Anvil RPC client & Base CMAB Environment
+│   ├── datasets/                # Alat kategorisasi dan ringkasan SC-Bench dataset
+│   ├── charts/                  # Visualisasi hasil evaluasi komparatif (grafik trajektori, reward, dsb.)
+│   ├── run_scbench_10contracts.py # Skrip utama benchmark 11 kontrak SC-Bench
+│   ├── run_cmab_simulation.py   # Skrip simulasi interaksi CMAB tunggal
+│   ├── run_comparative_experiment.py # Skrip pengujian perbandingan LinUCB vs D-LinUCB
+│   └── report.md                # Laporan komprehensif evaluasi empiris
+├── anvil_env/                   # Lingkungan Foundry & Anvil
+│   ├── src/                     # Kontrak uji lokal (MockToken.sol, VulnerableVault.sol)
+│   ├── scripts/                 # Otomasi deployment Anvil & setup agen tanpa privilese
+│   └── deployed_addresses.json  # Alamat kontrak hasil deploy lokal
+└── SC-Bench/                    # Dataset kurasi smart contract SC-Bench
+    └── categorized_dataset/     # Dataset terkategori (Vault_and_Liquidity, AMM, Lending, Governance)
+```
 
-   ```bash
-   cargo build --release
-   ```
+---
 
-4. **Prepare Smart Contract Binaries**
-   Each smart contract should be **compiled** before testing. Make sure each contract folder contains the corresponding `.abi` and `.bin` files.
+## 🚀 Panduan Memulai Cepat
 
-5. **Run Fuzzing on a Contract**
-   To test a single smart contract, run:
+### 1. Prasyarat Sistem
+- **Python ≥ 3.10** dengan pustaka: `numpy`, `web3` (opsional), `matplotlib`
+- **Foundry / Anvil**: Terinstal di path sistem (`anvil`, `cast`, `forge`)
 
-   ```bash
-   cargo run --features print_txn_corpus --package ityfuzz --bin ityfuzz -- evm -t dir_path/*
-   ```
+### 2. Memastikan Node Anvil Berjalan
+Node Anvil dapat dijalankan di latar belakang pada port default `8545`:
+```bash
+./anvil_env/scripts/start_anvil.sh
+```
+Atau menggunakan Anvil CLI secara langsung:
+```bash
+anvil --port 8545 --chain-id 31337 --accounts 10 --balance 10000 --gas-limit 30000000
+```
 
-   Replace `dir_path` with the actual path to the contract directory.
+### 3. Menjalankan Benchmark Evaluasi SC-Bench
+Eksekusi evaluasi komparasi LinUCB vs D-LinUCB pada smart contract SC-Bench:
+```bash
+# Skenario Horizon Tetap (Fixed Horizon, T = 24 rounds)
+python3 cmab_anvil/run_scbench_10contracts.py --scenario fixed --gas-mode static
 
-6. **Log Output**
-   For each smart contract tested, output will be saved to a log file named:
+# Skenario Ketahanan Modal & Gas Fluktuatif (Capital Exhaustion Scenario)
+python3 cmab_anvil/run_scbench_10contracts.py --scenario capital --gas-mode worst_case --capital 0.50
+```
 
-   ```
-   <contract_name>.log
-   ```
+### 4. Menjalankan Simulasi Tunggal (Agen Vault Custody)
+```bash
+# Simulasi menggunakan Discounted LinUCB
+python3 cmab_anvil/run_cmab_simulation.py --algorithm d-linucb --gamma 0.85 --rounds 10
 
-   This file is saved in the corresponding contract’s directory. The log contains:
+# Simulasi menggunakan Disjoint LinUCB
+python3 cmab_anvil/run_cmab_simulation.py --algorithm linucb --alpha 1.25 --rounds 8
+```
 
-   * **STDOUT**: Basic execution information such as deployment, mutation actions, and coverage results.
-   * **STDERR**: Any error messages or internal diagnostics.
-   * **Detected Vulnerabilities Section**:
-     If any vulnerabilities are found, they will be clearly listed, including:
+---
 
-     * Vulnerability type (e.g., Selfdestruct, Reentrancy)
-     * Related function calls and traces
-     * Final instruction and branch coverage
+## 📊 Hasil Evaluasi & Dokumentasi
+- Laporan lengkap perancangan metodologi & hasil empiris dapat dilihat di [`cmab_anvil/report.md`](cmab_anvil/report.md).
+- Analisis ketahanan modal pada kondisi worst-case gas dapat dilihat di [`cmab_anvil/laporan_worst_gas_no_regime_double_capital.md`](cmab_anvil/laporan_worst_gas_no_regime_double_capital.md).
+- Grafik perbandingan trajektori dan performa tersedia di folder [`cmab_anvil/charts/`](cmab_anvil/charts/).
 
-     You can quickly locate this section by searching for:
+---
 
-     ```
-     Found vulnerabilities!
-     ```
+## 📜 Lisensi
+Proyek ini dilisensikan di bawah ketentuan lisensi yang tertera pada berkas [LICENSE](LICENSE).

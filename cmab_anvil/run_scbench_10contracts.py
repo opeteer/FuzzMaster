@@ -533,17 +533,28 @@ def apply_regime_shift(spec: Dict[str, Any], caddr: str, mock_token_addr: str, r
     return "Regime updated"
 
 
-def pregenerate_network_events(contract_idx: int, rounds: int) -> List[Dict[str, Any]]:
+def pregenerate_network_events(contract_idx: int, rounds: int, event_mode: str = "stochastic") -> List[Dict[str, Any]]:
     """
-    Pre-generates stochastic blockchain network events using a fixed Common Random Number (CRN)
-    seed per contract so that LinUCB and D-LinUCB experience the EXACT same random blockchain
-    disturbances at every round t.
+    Pre-generates stochastic blockchain network events under Common Random Numbers (CRN):
+      - 'none': Clean baseline with zero external disturbances.
+      - 'stochastic': Full dynamic environment featuring:
+          1. peer_liquidity (25%): External peer deposit/whale inflow.
+          2. peer_withdrawal (25%): Peer withdraws their own legitimate deposited balance.
+          3. block_jitter (20%): Time-lock/latency drift (30-900s).
+          4. congestion_poke (15%): Background mempool token transfers.
+          5. none (15%): Normal calm block interval.
     """
+    if event_mode == "none":
+        return [{"round": t, "type": "none", "eth_delta": 0.0, "time_delta": 0} for t in range(1, rounds + 1)]
+
     rng = np.random.default_rng(seed=202600 + contract_idx * 37)
     events = []
     for t in range(1, rounds + 1):
-        ev_type = rng.choice(["peer_liquidity", "block_jitter", "congestion_poke", "none"], p=[0.30, 0.30, 0.20, 0.20])
-        eth_delta = float(np.round(rng.uniform(0.10, 0.80), 3))
+        ev_type = rng.choice(
+            ["peer_liquidity", "peer_withdrawal", "block_jitter", "congestion_poke", "none"],
+            p=[0.25, 0.25, 0.20, 0.15, 0.15],
+        )
+        eth_delta = float(np.round(rng.uniform(0.10, 0.50), 3))
         time_delta = int(rng.integers(30, 900))
         events.append({
             "round": t,
@@ -578,14 +589,38 @@ def pregenerate_gas_prices(contract_idx: int, gas_mode: str, rounds: int) -> Lis
     return [1.0] * rounds
 
 
-def execute_network_event(ev: Dict[str, Any], caddr: str, mock_token_addr: str) -> None:
-    if ev["type"] == "peer_liquidity":
-        # Peer sends ETH or tokens to create realistic liquidity fluctuations
+def execute_network_event(
+    ev: Dict[str, Any],
+    caddr: str,
+    mock_token_addr: str,
+    peer_state: Dict[str, float],
+    client: UnprivilegedAnvilClient,
+) -> None:
+    ev_type = ev["type"]
+    if ev_type == "peer_liquidity":
+        # Peer sends ETH to the vault (inflow shock)
         send_tx(PEER_PK, caddr, "", [], ev["eth_delta"])
-    elif ev["type"] == "block_jitter":
+        peer_state["deposited_eth"] = peer_state.get("deposited_eth", 0.0) + ev["eth_delta"]
+
+    elif ev_type == "peer_withdrawal":
+        # Peer withdraws legitimate funds strictly limited to what they own in the vault!
+        avail = peer_state.get("deposited_eth", 0.0)
+        c_bal = client.get_eth_balance(caddr)
+        max_withdrawable = min(avail, c_bal)
+        if max_withdrawable > 0.01:
+            w_amt = float(np.round(min(max_withdrawable, ev["eth_delta"]), 4))
+            peer_state["deposited_eth"] -= w_amt
+            # Execute on-chain withdrawal from vault back to PEER_ADDR
+            rpc_call("anvil_impersonateAccount", [caddr])
+            send_tx(DEPLOYER_PK, caddr, "", [], 0.02)
+            run_cast(["send", "--from", caddr, "--unlocked", "--value", f"{w_amt:.6f}ether", PEER_ADDR])
+            rpc_call("anvil_stopImpersonatingAccount", [caddr])
+
+    elif ev_type == "block_jitter":
         rpc_call("evm_increaseTime", [ev["time_delta"]])
         rpc_call("evm_mine", [])
-    elif ev["type"] == "congestion_poke":
+
+    elif ev_type == "congestion_poke":
         send_tx(PEER_PK, mock_token_addr, "transfer(address,uint256)", [DEPLOYER_ADDR, "1000000000000000"])
 
 
@@ -597,6 +632,7 @@ def build_context_vector(
     regime: int,
     recent_revert_rate: float,
     round_idx: int,
+    no_regime: bool = False,
 ) -> Tuple[np.ndarray, OnChainContextSnapshot]:
     block = client.get_block_number()
     vault_eth = client.get_eth_balance(caddr)
@@ -611,15 +647,24 @@ def build_context_vector(
     if total_dep == 0.0:
         total_dep = client.call_uint256_ether(caddr, "totalSupply()(uint256)")
 
+    if no_regime:
+        token_bal = client.call_uint256_ether(mock_token_addr, "balanceOf(address)(uint256)", AGENT_ADDR)
+        is_solvent = (vault_eth >= total_dep) if total_dep > 0 else True
+        is_locked = False
+    else:
+        token_bal = float(regime)
+        is_solvent = (regime == 1)
+        is_locked = (regime >= 2)
+
     snap = OnChainContextSnapshot(
         block_number=block,
         vault_eth_balance=vault_eth,
         vault_total_deposited=total_dep,
         agent_vault_balance=agent_bal,
         agent_eoa_eth_balance=agent_eth,
-        agent_token_balance=float(regime),
-        vault_is_solvent=(regime == 1),
-        vault_is_locked=(regime >= 2),
+        agent_token_balance=token_bal,
+        vault_is_solvent=is_solvent,
+        vault_is_locked=is_locked,
         vault_code_alive=code_alive,
         recent_revert_rate=recent_revert_rate,
     )
@@ -635,6 +680,7 @@ def execute_member_arm(
     round_t: int,
     regime: int,
     gas_price_gwei: Optional[float] = None,
+    no_regime: bool = False,
 ) -> Tuple[bool, str]:
     target = mock_token_addr if arm.get("target") == "MOCK_TOKEN" else caddr
     sig = arm["sig"]
@@ -648,10 +694,10 @@ def execute_member_arm(
         elif a == "DYNAMIC_URI_LOW":
             resolved_args.append(f"member_low_{round_t}")
         elif a == "DYNAMIC_ID":
-            # In Regime 1, fresh IDs succeed; in Regime 2/3, reuse ID 1 (which reverts with 'order exist')
-            resolved_args.append(str(100 + round_t) if regime == 1 else "1")
+            # In no-regime or Regime 1, fresh unique IDs succeed
+            resolved_args.append(str(100 + round_t) if (no_regime or regime == 1) else "1")
         elif a == "DYNAMIC_ID_ERC20":
-            resolved_args.append(str(200 + round_t) if regime == 1 else "1")
+            resolved_args.append(str(200 + round_t) if (no_regime or regime == 1) else "1")
         elif a == "DYNAMIC_ENDTIME":
             resolved_args.append(str(2500000000 + round_t * 10000))
         elif a == "MOCK_TOKEN":
@@ -659,12 +705,7 @@ def execute_member_arm(
         else:
             resolved_args.append(a)
 
-    # For PyramidToken (SC-04) and THREEAMIGOSCAPITAL (SC-05):
-    # If member already staked in Regime 1 and tries to stake again before unstaking, contract natively reverts!
     ok, out = send_tx(AGENT_PK, target, sig, resolved_args, val, gas_price_gwei=gas_price_gwei)
-
-    # After a successful stake in Regime 1 on PyramidToken/THREEAMIGOSCAPITAL, if we want multi-round staking in Regime 1
-    # vs locked staking at the end of Regime 1, let the contract's native state handle it or reset stake slot prior to t=8
     return ok, out
 
 
@@ -675,6 +716,7 @@ def score_transition(
     regime: int,
     prev_snap: OnChainContextSnapshot,
     next_snap: OnChainContextSnapshot,
+    no_regime: bool = False,
 ) -> Tuple[float, List[str]]:
     anomalies: List[str] = []
     role = arm.get("role", "")
@@ -686,39 +728,47 @@ def score_transition(
     # Base reward for valid on-chain execution
     reward = 0.20
 
-    # Role-based non-stationary payoff structure strictly bounded in [0.0, 1.0]
-    # - Regime 1 (t=1..8): Inflow/Staking Boom -> Inflow arms yield highest utility (+0.45, subtotal 0.65)
-    # - Regime 2 (t=9..16): Maturity Unlock & Cap Tightening -> Secondary/Outflow/Claim yield highest utility (+0.55, subtotal 0.75)
-    # - Regime 3 (t=17..24): Liquidity Stress & Emergency -> Emergency/Governance yield highest utility (+0.60, subtotal 0.80)
-    if regime == 1:
+    if no_regime:
+        # Stationary organic reward structure without artificial regime shifts
         if role in ("inflow_primary", "inflow_secondary"):
-            reward += 0.45
+            reward += 0.40
         elif role == "secondary_ops":
-            reward += 0.15
-        elif role == "emergency_ops":
-            reward += 0.05
-        elif role == "fallback_ops":
-            reward += 0.10
-    elif regime == 2:
-        if role == "secondary_ops":
-            reward += 0.55
-            anomalies.append(f"Regime-2 Maturity/Settlement yield captured via {arm['name']}")
-        elif role in ("inflow_primary", "inflow_secondary"):
-            reward += 0.00  # Saturated cap / fee drag yields baseline utility
+            reward += 0.35
         elif role == "emergency_ops":
             reward += 0.20
         elif role == "fallback_ops":
-            reward += 0.05
-    elif regime == 3:
-        if role == "emergency_ops":
-            reward += 0.60
-            anomalies.append(f"Regime-3 Emergency/Restructuring action executed via {arm['name']}")
-        elif role == "secondary_ops":
             reward += 0.15
-        elif role in ("inflow_primary", "inflow_secondary"):
-            reward += 0.00
-        elif role == "fallback_ops":
-            reward += 0.10
+    else:
+        # Role-based non-stationary payoff structure strictly bounded in [0.0, 1.0]
+        if regime == 1:
+            if role in ("inflow_primary", "inflow_secondary"):
+                reward += 0.45
+            elif role == "secondary_ops":
+                reward += 0.15
+            elif role == "emergency_ops":
+                reward += 0.05
+            elif role == "fallback_ops":
+                reward += 0.10
+        elif regime == 2:
+            if role == "secondary_ops":
+                reward += 0.55
+                anomalies.append(f"Regime-2 Maturity/Settlement yield captured via {arm['name']}")
+            elif role in ("inflow_primary", "inflow_secondary"):
+                reward += 0.00  # Saturated cap / fee drag yields baseline utility
+            elif role == "emergency_ops":
+                reward += 0.20
+            elif role == "fallback_ops":
+                reward += 0.05
+        elif regime == 3:
+            if role == "emergency_ops":
+                reward += 0.60
+                anomalies.append(f"Regime-3 Emergency/Restructuring action executed via {arm['name']}")
+            elif role == "secondary_ops":
+                reward += 0.15
+            elif role in ("inflow_primary", "inflow_secondary"):
+                reward += 0.00
+            elif role == "fallback_ops":
+                reward += 0.10
 
     # Bonus for unprivileged access control bypass (Security Finding)
     if role == "probe" or "unprotected" in arm["name"] or "public_withdraw" in arm["name"]:
@@ -750,6 +800,7 @@ def run_policy_on_contract(
     initial_capital_eth: float = 0.50,
     min_capital_threshold_eth: float = 0.005,
     max_safety_rounds: int = 10000,
+    no_regime: bool = False,
 ) -> Dict[str, Any]:
     # 1. Fresh deployment of MockToken and Target Contract
     mock_token_addr = deploy_bytecode(mock_token_bytecode, "constructor(uint256)", ["1000000000000000000000000"])
@@ -764,6 +815,10 @@ def run_policy_on_contract(
     # 2. Setup Member Onboarding (Initial Token Balances, Approvals, Pool Init)
     setup_member_environment(spec, caddr, mock_token_addr)
 
+    # Seed peer's initial deposit into vault so peer owns legitimate funds ready to be withdrawn
+    send_tx(PEER_PK, caddr, "", [], 0.50)
+    peer_state: Dict[str, float] = {"deposited_eth": 0.50}
+
     # 3. Setup Initial Agent Capital for Scenario
     client = UnprivilegedAnvilClient(rpc_url=RPC_URL)
     starting_capital = initial_capital_eth if scenario == "capital" else 5.0
@@ -775,6 +830,7 @@ def run_policy_on_contract(
 
     rewards: List[float] = []
     regime_rewards: Dict[int, List[float]] = {1: [], 2: [], 3: []}
+    round_logs: List[Dict[str, Any]] = []
     arm_counts = [0] * K
     success_count = 0
     anomalies_found: List[str] = []
@@ -799,17 +855,18 @@ def run_policy_on_contract(
         rpc_call("anvil_setNextBlockBaseFeePerGas", [hex(int(current_gas_gwei * 1e9))])
 
         regime = 1 if t <= 8 else (2 if t <= 16 else 3)
-        if t == 9:
-            apply_regime_shift(spec, caddr, mock_token_addr, regime=2)
-        elif t == 17:
-            apply_regime_shift(spec, caddr, mock_token_addr, regime=3)
+        if not no_regime:
+            if t == 9:
+                apply_regime_shift(spec, caddr, mock_token_addr, regime=2)
+            elif t == 17:
+                apply_regime_shift(spec, caddr, mock_token_addr, regime=3)
 
         # Replay pre-generated stochastic blockchain event (identical for both algorithms)
         if t - 1 < len(network_events):
-            execute_network_event(network_events[t - 1], caddr, mock_token_addr)
+            execute_network_event(network_events[t - 1], caddr, mock_token_addr, peer_state, client)
 
         rev_rate = float(np.mean(recent_reverts[-8:])) if recent_reverts else 0.0
-        vec, prev_snap = build_context_vector(caddr, mock_token_addr, client, extractor, regime, rev_rate, t)
+        vec, prev_snap = build_context_vector(caddr, mock_token_addr, client, extractor, regime, rev_rate, t, no_regime=no_regime)
 
         sel = policy.select_arm(vec)
         arm_idx = sel.arm_id
@@ -817,24 +874,25 @@ def run_policy_on_contract(
         arm_counts[arm_idx] += 1
 
         # Track adaptation delay after regime shifts
-        if regime == 2 and not adapted_r2:
-            if chosen_arm.get("role") in ("secondary_ops", "emergency_ops"):
-                adapted_r2 = True
-            else:
-                adaptation_steps_r2 += 1
-        if regime == 3 and not adapted_r3:
-            if chosen_arm.get("role") == "emergency_ops":
-                adapted_r3 = True
-            else:
-                adaptation_steps_r3 += 1
+        if not no_regime:
+            if regime == 2 and not adapted_r2:
+                if chosen_arm.get("role") in ("secondary_ops", "emergency_ops"):
+                    adapted_r2 = True
+                else:
+                    adaptation_steps_r2 += 1
+            if regime == 3 and not adapted_r3:
+                if chosen_arm.get("role") == "emergency_ops":
+                    adapted_r3 = True
+                else:
+                    adaptation_steps_r3 += 1
 
-        tx_ok, _ = execute_member_arm(spec, chosen_arm, caddr, mock_token_addr, t, regime, gas_price_gwei=current_gas_gwei)
+        tx_ok, _ = execute_member_arm(spec, chosen_arm, caddr, mock_token_addr, t, regime, gas_price_gwei=current_gas_gwei, no_regime=no_regime)
         if tx_ok:
             success_count += 1
         recent_reverts.append(0 if tx_ok else 1)
 
-        _, next_snap = build_context_vector(caddr, mock_token_addr, client, extractor, regime, rev_rate, t)
-        rew, anoms = score_transition(spec, chosen_arm, tx_ok, regime, prev_snap, next_snap)
+        _, next_snap = build_context_vector(caddr, mock_token_addr, client, extractor, regime, rev_rate, t, no_regime=no_regime)
+        rew, anoms = score_transition(spec, chosen_arm, tx_ok, regime, prev_snap, next_snap, no_regime=no_regime)
 
         policy.update(arm_idx, vec, rew)
         rewards.append(rew)
@@ -842,8 +900,27 @@ def run_policy_on_contract(
         if anoms:
             anomalies_found.extend(anoms)
 
-        # In Capital Scenario, check if post-tx balance depleted
+        # Query post-tx balance
         post_bal = client.get_eth_balance(AGENT_ADDR)
+        ev_name = network_events[t - 1]["type"] if (t - 1 < len(network_events)) else "none"
+
+        round_log = {
+            "round": t,
+            "regime": regime,
+            "gas_price_gwei": round(current_gas_gwei, 2),
+            "arm_id": arm_idx,
+            "arm_name": chosen_arm["name"],
+            "arm_role": chosen_arm.get("role", ""),
+            "tx_ok": tx_ok,
+            "reward": round(rew, 4),
+            "cumulative_reward": round(float(np.sum(rewards)), 4),
+            "balance_eth": round(post_bal, 6),
+            "burned_eth": round(max(0.0, starting_capital - post_bal), 6),
+            "event_type": ev_name,
+        }
+        round_logs.append(round_log)
+
+        # In Capital Scenario, check if post-tx balance depleted
         if scenario == "capital" and post_bal <= min_capital_threshold_eth:
             termination_reason = "bankruptcy"
             break
@@ -887,17 +964,33 @@ def run_policy_on_contract(
         "arm_entropy_bits": round(entropy, 4),
         "theta_norms": [round(float(np.linalg.norm(policy.theta[a])), 4) for a in range(K)],
         "anomalies": sorted(list(set(anomalies_found))),
+        "round_logs": round_logs,
     }
 
 
-def run_benchmark_for_scenario(scenario: str, gas_mode: str = "static", capital: float = 0.50, fixed_rounds: int = 24, max_safety_rounds: int = 10000) -> List[Dict[str, Any]]:
+def run_benchmark_for_scenario(
+    scenario: str,
+    gas_mode: str = "static",
+    event_mode: str = "stochastic",
+    capital: float = 0.50,
+    fixed_rounds: int = 24,
+    max_safety_rounds: int = 10000,
+    contracts_limit: Optional[int] = None,
+    no_regime: bool = False,
+    alpha: float = 0.15,
+    use_theoretical_beta: bool = False,
+) -> List[Dict[str, Any]]:
     print("=" * 96)
+    specs_to_run = CONTRACT_SPECS[:contracts_limit] if contracts_limit else CONTRACT_SPECS
+    total_c = len(specs_to_run)
+    regime_tag = "NO_REGIME (ORGANIC)" if no_regime else "3_REGIMES"
+    beta_tag = "THEORETICAL_BETA" if use_theoretical_beta else "MATCHED_ALPHA"
     if scenario == "fixed":
-        print(f"🚀 SCENARIO A: FIXED TIME HORIZON BENCHMARK | Gas Mode: {gas_mode.upper()} (11 KONTRAK ON ANVIL)")
-        print(f"   Setup: Member Privilege + 3-Phase Shift + Paired CRN | Fixed T = {fixed_rounds} Rounds/Contract")
+        print(f"🚀 SCENARIO A: FIXED TIME HORIZON | Gas: {gas_mode.upper()} | Events: {event_mode.upper()} | Regime: {regime_tag} | Alpha: {alpha} ({beta_tag}) ({total_c} KONTRAK ON ANVIL)")
+        print(f"   Setup: Member Privilege + Paired CRN | Fixed T = {fixed_rounds} Rounds/Contract")
     else:
-        print(f"🚀 SCENARIO B: CAPITAL EXHAUSTION BENCHMARK | Gas Mode: {gas_mode.upper()} (KNAPSACK STOPPING ON ANVIL)")
-        print(f"   Setup: Initial Capital = {capital:.2f} ETH | Stop: Balance <= 0.005 ETH OR T_max = {max_safety_rounds}")
+        print(f"🚀 SCENARIO B: CAPITAL EXHAUSTION | Gas: {gas_mode.upper()} | Events: {event_mode.upper()} | Regime: {regime_tag} | Alpha: {alpha} ({beta_tag}) (KNAPSACK STOPPING ON ANVIL)")
+        print(f"   Setup: Initial Capital = {capital:.2f} ETH | Stop: Balance <= 0.005 ETH OR T_max = {max_safety_rounds} ({total_c} Kontrak)")
     print("=" * 96)
 
     mock_token_bin = compile_contract(MOCK_TOKEN_SOL, "MockToken")
@@ -908,40 +1001,42 @@ def run_benchmark_for_scenario(scenario: str, gas_mode: str = "static", capital:
     t0 = time.time()
     event_horizon = max_safety_rounds if scenario == "capital" else fixed_rounds
 
-    for idx, spec in enumerate(CONTRACT_SPECS, 1):
+    for idx, spec in enumerate(specs_to_run, 1):
         cname = spec["contract"]
         fpath = DATASET_DIR / spec["split"] / spec["file"]
-        print(f"\n[{idx:02d}/11] Kontrak: {cname:<20} ({spec['split']}/{spec['file']})")
+        print(f"\n[{idx:02d}/{total_c:02d}] Kontrak: {cname:<20} ({spec['split']}/{spec['file']})")
 
         c_bin = compile_contract(fpath, cname)
         if not c_bin:
             print(f"       [!] Gagal kompilasi {cname}")
             continue
 
-        net_events = pregenerate_network_events(idx, rounds=event_horizon)
+        net_events = pregenerate_network_events(idx, rounds=event_horizon, event_mode=event_mode)
         net_gas_prices = pregenerate_gas_prices(idx, gas_mode=gas_mode, rounds=event_horizon)
 
         K = len(spec["arms"])
-        lin_policy = DisjointLinUCB(n_arms=K, context_dim=CONTEXT_DIM, alpha=0.15, l2_lambda=1.0)
+        lin_policy = DisjointLinUCB(n_arms=K, context_dim=CONTEXT_DIM, alpha=alpha, l2_lambda=1.0)
         dlin_policy = DiscountedLinUCB(
             n_arms=K,
             context_dim=CONTEXT_DIM,
             gamma=0.82,
-            alpha=0.15,
+            alpha=alpha,
             l2_lambda=1.0,
-            use_theoretical_beta=True,
+            use_theoretical_beta=use_theoretical_beta,
             decay_all_arms=True,
         )
 
         lin_res = run_policy_on_contract(
             "LinUCB", lin_policy, spec, c_bin, mock_token_bin, net_events,
             gas_prices=net_gas_prices, gas_mode=gas_mode,
-            scenario=scenario, fixed_rounds=fixed_rounds, initial_capital_eth=capital, max_safety_rounds=max_safety_rounds
+            scenario=scenario, fixed_rounds=fixed_rounds, initial_capital_eth=capital, max_safety_rounds=max_safety_rounds,
+            no_regime=no_regime,
         )
         dlin_res = run_policy_on_contract(
             "D-LinUCB", dlin_policy, spec, c_bin, mock_token_bin, net_events,
             gas_prices=net_gas_prices, gas_mode=gas_mode,
-            scenario=scenario, fixed_rounds=fixed_rounds, initial_capital_eth=capital, max_safety_rounds=max_safety_rounds
+            scenario=scenario, fixed_rounds=fixed_rounds, initial_capital_eth=capital, max_safety_rounds=max_safety_rounds,
+            no_regime=no_regime,
         )
 
         entry = {
@@ -952,6 +1047,8 @@ def run_benchmark_for_scenario(scenario: str, gas_mode: str = "static", capital:
             "description": spec["description"],
             "scenario": scenario,
             "gas_mode": gas_mode,
+            "event_mode": event_mode,
+            "no_regime": no_regime,
             "linucb": lin_res,
             "d_linucb": dlin_res,
         }
@@ -981,14 +1078,15 @@ def run_benchmark_for_scenario(scenario: str, gas_mode: str = "static", capital:
             )
 
     elapsed = time.time() - t0
-    fname = f"scbench_{scenario}_{gas_mode}_results.json"
+    regime_suffix = "_no_regime" if no_regime else ""
+    fname = f"scbench_{scenario}_{gas_mode}_{event_mode}{regime_suffix}_results.json"
     out_path = REPO_ROOT / "cmab_anvil" / fname
     out_path.write_text(json.dumps(all_results, indent=2))
-    if scenario == "fixed" and gas_mode == "static":
+    if scenario == "fixed" and gas_mode == "static" and event_mode == "stochastic" and not no_regime:
         legacy_path = REPO_ROOT / "cmab_anvil" / "scbench_10contracts_comparison.json"
         legacy_path.write_text(json.dumps(all_results, indent=2))
     print("\n" + "=" * 96)
-    print(f"🏁 SELESAI ({scenario.upper()} - {gas_mode.upper()}) DALAM {elapsed:.2f} DETIK | Telemetri disimpan ke: {out_path}")
+    print(f"🏁 SELESAI ({scenario.upper()} - {gas_mode.upper()} - {event_mode.upper()}{' - NO_REGIME' if no_regime else ''}) DALAM {elapsed:.2f} DETIK | Telemetri disimpan ke: {out_path}")
     print("=" * 96)
     return all_results
 
@@ -998,22 +1096,48 @@ def main():
     parser = argparse.ArgumentParser(description="SC-Bench CMAB Simulation on Anvil (Dual Stopping Scenarios & Gas Price Regimes)")
     parser.add_argument("--scenario", choices=["fixed", "capital", "both"], default="fixed", help="Stopping condition scenario")
     parser.add_argument("--gas-mode", choices=["static", "normal", "worst_case", "all"], default="static", help="Gas price fluctuation mode")
+    parser.add_argument("--event-mode", choices=["none", "stochastic", "both"], default="stochastic", help="Blockchain network event mode (Ablation)")
     parser.add_argument("--capital", type=float, default=0.50, help="Initial capital in ETH for capital exhaustion scenario")
     parser.add_argument("--fixed-rounds", type=int, default=24, help="Fixed horizon rounds for scenario A")
     parser.add_argument("--max-rounds", type=int, default=10000, help="Max safety rounds for scenario B (default: 10000)")
+    parser.add_argument("--contracts-limit", type=int, default=None, help="Limit number of contracts to evaluate (e.g. 5)")
+    parser.add_argument("--no-regime", action="store_true", help="Disable artificial regime shift system (pure organic environment)")
+    parser.add_argument("--alpha", type=float, default=0.15, help="Exploration hyperparameter alpha (default: 0.15)")
+    parser.add_argument("--use-theoretical-beta", action="store_true", help="Enable theoretical confidence radius beta for D-LinUCB (default: False, matches alpha)")
     args = parser.parse_args()
 
     ensure_anvil_running()
 
     scenarios_to_run = ["fixed", "capital"] if args.scenario == "both" else [args.scenario]
     gas_modes_to_run = ["static", "normal", "worst_case"] if args.gas_mode == "all" else [args.gas_mode]
+    event_modes_to_run = ["none", "stochastic"] if args.event_mode == "both" else [args.event_mode]
 
     for sc in scenarios_to_run:
         for gm in gas_modes_to_run:
-            if sc == "fixed":
-                run_benchmark_for_scenario("fixed", gas_mode=gm, fixed_rounds=args.fixed_rounds)
-            else:
-                run_benchmark_for_scenario("capital", gas_mode=gm, capital=args.capital, max_safety_rounds=args.max_rounds)
+            for em in event_modes_to_run:
+                if sc == "fixed":
+                    run_benchmark_for_scenario(
+                        "fixed",
+                        gas_mode=gm,
+                        event_mode=em,
+                        fixed_rounds=args.fixed_rounds,
+                        contracts_limit=args.contracts_limit,
+                        no_regime=args.no_regime,
+                        alpha=args.alpha,
+                        use_theoretical_beta=args.use_theoretical_beta,
+                    )
+                else:
+                    run_benchmark_for_scenario(
+                        "capital",
+                        gas_mode=gm,
+                        event_mode=em,
+                        capital=args.capital,
+                        max_safety_rounds=args.max_rounds,
+                        contracts_limit=args.contracts_limit,
+                        no_regime=args.no_regime,
+                        alpha=args.alpha,
+                        use_theoretical_beta=args.use_theoretical_beta,
+                    )
 
 
 if __name__ == "__main__":

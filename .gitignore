@@ -1,6 +1,3 @@
-# Rust build artifacts
-/target/
-
 # Python cache
 __pycache__/
 *.py[cod]
@@ -13,7 +10,9 @@ anvil_env/.anvil.pid
 anvil_env/broadcast/**/run-*.json
 anvil_env/cache/
 
+# CMAB runtime logs & PID
+cmab_anvil/*.log
+cmab_anvil/.benchmark.pid
 
-# External benchmark datasets (local clones)
+# External benchmark datasets (local clone)
 /SC-Bench/
-/smartbugs-curated/
