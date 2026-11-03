@@ -1,0 +1,589 @@
+{
+  "standing": {
+    "agent_name": "Agen_Vault_Custody",
+    "agent_address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "vault_owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "vault_address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+    "token_address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+    "standing": "STRICT_UNPRIVILEGED_EOA"
+  },
+  "diagnostics": {
+    "policy_name": "DiscountedLinUCB",
+    "total_rounds": 14,
+    "cumulative_reward": 7.199999999999197,
+    "mean_reward": 0.514285714285657,
+    "arm_counts": [
+      2,
+      2,
+      2,
+      2,
+      1,
+      2,
+      2,
+      1
+    ],
+    "effective_pulls": [
+      0.6429,
+      1.0431,
+      0.8457,
+      1.1969,
+      0.1673,
+      0.8209,
+      0.9922,
+      0.2725
+    ],
+    "theta_l2_norms": [
+      0.10251678365942116,
+      0.13412135535445863,
+      0.25611230066597024,
+      0.07835196480117758,
+      0.1140068736946181,
+      1.309226962224181,
+      0.06468291763811827,
+      0.05408295928685368
+    ],
+    "gamma": 0.85,
+    "alpha": 0.5,
+    "l2_lambda": 1.0,
+    "delta": 0.05,
+    "use_theoretical_beta": true,
+    "decay_all_arms": true
+  },
+  "discovered_vulnerabilities": [
+    {
+      "round": 2,
+      "arm_id": 6,
+      "arm_name": "token_mint_user",
+      "anomaly": "UNPROTECTED_PUBLIC_MINT (+250 MCK minted by non-owner)"
+    },
+    {
+      "round": 8,
+      "arm_id": 5,
+      "arm_name": "vault_emergency_drain_probe",
+      "anomaly": "SOLVENCY_INVARIANT_BREACH (address(vault).balance < totalDeposited)"
+    },
+    {
+      "round": 8,
+      "arm_id": 5,
+      "arm_name": "vault_emergency_drain_probe",
+      "anomaly": "UNAUTHORIZED_ETH_DRAIN (+13.00 ETH extracted)"
+    },
+    {
+      "round": 13,
+      "arm_id": 6,
+      "arm_name": "token_mint_user",
+      "anomaly": "UNPROTECTED_PUBLIC_MINT (+250 MCK minted by non-owner)"
+    }
+  ],
+  "feature_names": [
+    "x0_bias",
+    "x1_vault_eth_norm",
+    "x2_vault_total_dep_norm",
+    "x3_vault_drain_threshold",
+    "x4_agent_vault_stake_norm",
+    "x5_agent_liquid_eth_norm",
+    "x6_solvency_gap_ratio",
+    "x7_agent_token_share",
+    "x8_recent_revert_rate",
+    "x9_vault_code_alive"
+  ],
+  "history": [
+    {
+      "round": 1,
+      "arm_id": 0,
+      "arm_name": "vault_deposit_small",
+      "ucb_score": 4.750979957514813,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 4.750979957514813,
+      "tx_succeeded": true,
+      "reward": 0.6499999999999005,
+      "reward_breakdown": {
+        "total_reward": 0.6499999999999005,
+        "net_eth_gain": -9.947598300641403e-14,
+        "state_discovery": 0.65,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.6666666666666666,
+        0.6666666666666666,
+        1.0,
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "vault_eth_after": 10.25,
+      "agent_eoa_eth_after": 39.249999817271274,
+      "agent_vault_stake_after": 0.25,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 2,
+      "arm_id": 6,
+      "arm_name": "token_mint_user",
+      "ucb_score": 5.077421051520002,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.077421051520002,
+      "tx_succeeded": true,
+      "reward": 0.24999999999989697,
+      "reward_breakdown": {
+        "total_reward": 0.24999999999989697,
+        "net_eth_gain": -1.0302869668521453e-13,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.25,
+        "revert_penalty": 0.0,
+        "detected_anomalies": [
+          "UNPROTECTED_PUBLIC_MINT (+250 MCK minted by non-owner)"
+        ]
+      },
+      "context": [
+        1.0,
+        0.6833333333333333,
+        0.6833333333333333,
+        1.0,
+        0.05,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "vault_eth_after": 10.25,
+      "agent_eoa_eth_after": 39.24999981727086,
+      "agent_vault_stake_after": 0.25,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 3,
+      "arm_id": 4,
+      "arm_name": "vault_deposit_zero_probe",
+      "ucb_score": 5.265320823465083,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.265320823465083,
+      "tx_succeeded": false,
+      "reward": -0.6,
+      "reward_breakdown": {
+        "total_reward": -0.6,
+        "net_eth_gain": 0.0,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": -0.6,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.6833333333333333,
+        0.6833333333333333,
+        1.0,
+        0.05,
+        3.0,
+        0.0,
+        0.25,
+        0.0,
+        1.0
+      ],
+      "vault_eth_after": 10.25,
+      "agent_eoa_eth_after": 39.24999981727086,
+      "agent_vault_stake_after": 0.25,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 4,
+      "arm_id": 3,
+      "arm_name": "vault_fallback_transfer",
+      "ucb_score": 5.396335302709935,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.396335302709935,
+      "tx_succeeded": true,
+      "reward": 0.2999999999999378,
+      "reward_breakdown": {
+        "total_reward": 0.2999999999999378,
+        "net_eth_gain": -6.217248937900877e-14,
+        "state_discovery": 0.3,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.6833333333333333,
+        0.6833333333333333,
+        1.0,
+        0.05,
+        3.0,
+        0.0,
+        0.25,
+        0.3333333333333333,
+        1.0
+      ],
+      "vault_eth_after": 10.35,
+      "agent_eoa_eth_after": 39.14999981727061,
+      "agent_vault_stake_after": 0.35,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 5,
+      "arm_id": 2,
+      "arm_name": "vault_withdraw_all",
+      "ucb_score": 5.461276838332582,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.461276838332582,
+      "tx_succeeded": true,
+      "reward": 0.749999999999929,
+      "reward_breakdown": {
+        "total_reward": 0.749999999999929,
+        "net_eth_gain": -7.105427357601002e-14,
+        "state_discovery": 0.75,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.69,
+        0.69,
+        1.0,
+        0.06999999999999999,
+        3.0,
+        0.0,
+        0.25,
+        0.25,
+        1.0
+      ],
+      "vault_eth_after": 10.0,
+      "agent_eoa_eth_after": 39.49999981727033,
+      "agent_vault_stake_after": 0.0,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 6,
+      "arm_id": 7,
+      "arm_name": "token_transfer_vault",
+      "ucb_score": 5.4898172245264405,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.4898172245264405,
+      "tx_succeeded": true,
+      "reward": 0.24999999999989697,
+      "reward_breakdown": {
+        "total_reward": 0.24999999999989697,
+        "net_eth_gain": -1.0302869668521453e-13,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.25,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.6666666666666666,
+        0.6666666666666666,
+        1.0,
+        0.0,
+        3.0,
+        0.0,
+        0.25,
+        0.2,
+        1.0
+      ],
+      "vault_eth_after": 10.0,
+      "agent_eoa_eth_after": 39.49999981726992,
+      "agent_vault_stake_after": 0.0,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 7,
+      "arm_id": 1,
+      "arm_name": "vault_deposit_medium",
+      "ucb_score": 5.597794973791538,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.597794973791538,
+      "tx_succeeded": true,
+      "reward": 0.6499999999999005,
+      "reward_breakdown": {
+        "total_reward": 0.6499999999999005,
+        "net_eth_gain": -9.947598300641403e-14,
+        "state_discovery": 0.65,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.8,
+        0.8,
+        1.0,
+        0.0,
+        3.0,
+        0.0,
+        0.2,
+        0.16666666666666666,
+        1.0
+      ],
+      "vault_eth_after": 13.0,
+      "agent_eoa_eth_after": 38.49999981726952,
+      "agent_vault_stake_after": 1.0,
+      "vault_solvent_after": true
+    },
+    {
+      "round": 8,
+      "arm_id": 5,
+      "arm_name": "vault_emergency_drain_probe",
+      "ucb_score": 5.674403936247478,
+      "expected_reward": 0.0,
+      "uncertainty_bonus": 5.674403936247478,
+      "tx_succeeded": true,
+      "reward": 5.0,
+      "reward_breakdown": {
+        "total_reward": 5.0,
+        "net_eth_gain": 2.5,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 3.5,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": [
+          "SOLVENCY_INVARIANT_BREACH (address(vault).balance < totalDeposited)",
+          "UNAUTHORIZED_ETH_DRAIN (+13.00 ETH extracted)"
+        ]
+      },
+      "context": [
+        1.0,
+        0.8666666666666667,
+        0.8666666666666667,
+        1.0,
+        0.2,
+        3.0,
+        0.0,
+        0.2,
+        0.14285714285714285,
+        1.0
+      ],
+      "vault_eth_after": 0.0,
+      "agent_eoa_eth_after": 51.499999817269305,
+      "agent_vault_stake_after": 1.0,
+      "vault_solvent_after": false
+    },
+    {
+      "round": 9,
+      "arm_id": 5,
+      "arm_name": "vault_emergency_drain_probe",
+      "ucb_score": 6.831215496815025,
+      "expected_reward": 4.057134893225839,
+      "uncertainty_bonus": 2.774080603589186,
+      "tx_succeeded": false,
+      "reward": -0.6,
+      "reward_breakdown": {
+        "total_reward": -0.6,
+        "net_eth_gain": 0.0,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": -0.6,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.0,
+        0.8666666666666667,
+        0.0,
+        0.2,
+        3.0,
+        -1.0,
+        0.2,
+        0.125,
+        1.0
+      ],
+      "vault_eth_after": 0.0,
+      "agent_eoa_eth_after": 51.499999817269305,
+      "agent_vault_stake_after": 1.0,
+      "vault_solvent_after": false
+    },
+    {
+      "round": 10,
+      "arm_id": 0,
+      "arm_name": "vault_deposit_small",
+      "ucb_score": 3.338958099973049,
+      "expected_reward": 0.45447630568187913,
+      "uncertainty_bonus": 2.88448179429117,
+      "tx_succeeded": true,
+      "reward": 0.2999999999999325,
+      "reward_breakdown": {
+        "total_reward": 0.2999999999999325,
+        "net_eth_gain": -6.750155989720952e-14,
+        "state_discovery": 0.3,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.0,
+        0.8666666666666667,
+        0.0,
+        0.2,
+        3.0,
+        -1.0,
+        0.2,
+        0.2222222222222222,
+        1.0
+      ],
+      "vault_eth_after": 0.25,
+      "agent_eoa_eth_after": 51.249999817269035,
+      "agent_vault_stake_after": 1.25,
+      "vault_solvent_after": false
+    },
+    {
+      "round": 11,
+      "arm_id": 2,
+      "arm_name": "vault_withdraw_all",
+      "ucb_score": 3.296593723842933,
+      "expected_reward": 0.5765168609426032,
+      "uncertainty_bonus": 2.7200768629003296,
+      "tx_succeeded": false,
+      "reward": -0.6,
+      "reward_breakdown": {
+        "total_reward": -0.6,
+        "net_eth_gain": 0.0,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": -0.6,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.016666666666666666,
+        0.8833333333333333,
+        0.05,
+        0.25,
+        3.0,
+        -0.9811320754716981,
+        0.2,
+        0.2,
+        1.0
+      ],
+      "vault_eth_after": 0.25,
+      "agent_eoa_eth_after": 51.249999817269035,
+      "agent_vault_stake_after": 1.25,
+      "vault_solvent_after": false
+    },
+    {
+      "round": 12,
+      "arm_id": 1,
+      "arm_name": "vault_deposit_medium",
+      "ucb_score": 3.264909091825108,
+      "expected_reward": 0.5050622961577602,
+      "uncertainty_bonus": 2.7598467956673476,
+      "tx_succeeded": true,
+      "reward": 0.29999999999993426,
+      "reward_breakdown": {
+        "total_reward": 0.29999999999993426,
+        "net_eth_gain": -6.572520305780927e-14,
+        "state_discovery": 0.3,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.016666666666666666,
+        0.8833333333333333,
+        0.05,
+        0.25,
+        3.0,
+        -0.9811320754716981,
+        0.2,
+        0.3,
+        1.0
+      ],
+      "vault_eth_after": 1.25,
+      "agent_eoa_eth_after": 50.24999981726877,
+      "agent_vault_stake_after": 2.25,
+      "vault_solvent_after": false
+    },
+    {
+      "round": 13,
+      "arm_id": 6,
+      "arm_name": "token_mint_user",
+      "ucb_score": 3.013468298353094,
+      "expected_reward": 0.16622397422384672,
+      "uncertainty_bonus": 2.8472443241292473,
+      "tx_succeeded": true,
+      "reward": 0.2499999999999325,
+      "reward_breakdown": {
+        "total_reward": 0.2499999999999325,
+        "net_eth_gain": -6.750155989720952e-14,
+        "state_discovery": 0.0,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.25,
+        "revert_penalty": 0.0,
+        "detected_anomalies": [
+          "UNPROTECTED_PUBLIC_MINT (+250 MCK minted by non-owner)"
+        ]
+      },
+      "context": [
+        1.0,
+        0.08333333333333333,
+        0.95,
+        0.25,
+        0.45,
+        3.0,
+        -0.9122807017543859,
+        0.2,
+        0.3,
+        1.0
+      ],
+      "vault_eth_after": 1.25,
+      "agent_eoa_eth_after": 50.2499998172685,
+      "agent_vault_stake_after": 2.25,
+      "vault_solvent_after": false
+    },
+    {
+      "round": 14,
+      "arm_id": 3,
+      "arm_name": "vault_fallback_transfer",
+      "ucb_score": 2.9654115821231217,
+      "expected_reward": 0.209286409667349,
+      "uncertainty_bonus": 2.7561251724557727,
+      "tx_succeeded": true,
+      "reward": 0.29999999999993604,
+      "reward_breakdown": {
+        "total_reward": 0.29999999999993604,
+        "net_eth_gain": -6.394884621840902e-14,
+        "state_discovery": 0.3,
+        "vulnerability_signal": 0.0,
+        "token_utility": 0.0,
+        "revert_penalty": 0.0,
+        "detected_anomalies": []
+      },
+      "context": [
+        1.0,
+        0.08333333333333333,
+        0.95,
+        0.25,
+        0.45,
+        3.0,
+        -0.9122807017543859,
+        0.45,
+        0.2,
+        1.0
+      ],
+      "vault_eth_after": 1.35,
+      "agent_eoa_eth_after": 50.149999817268245,
+      "agent_vault_stake_after": 2.35,
+      "vault_solvent_after": false
+    }
+  ]
+}

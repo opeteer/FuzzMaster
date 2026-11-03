@@ -1,0 +1,14 @@
+# Rust build artifacts
+/target/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+
+# Anvil runtime logs & PID
+anvil_env/*.log
+anvil_env/.anvil.pid
+anvil_env/broadcast/**/run-*.json
+anvil_env/cache/
