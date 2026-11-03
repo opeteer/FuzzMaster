@@ -1,0 +1,875 @@
+[
+  {
+    "id": "SC-01",
+    "contract": "ClashForStash",
+    "file": "ClashForStash-0x939b0425.sol",
+    "category": "Vault_Custody_Yield",
+    "description": "Token custody vault with min/max deposit caps, swap toggles, and member transfers",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 8,
+      "block_jitter_events": 8,
+      "congestion_poke_events": 3
+    },
+    "linucb": {
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "cumulative_reward": 74.30000000000001,
+      "mean_reward": 3.0958333333333337,
+      "success_rate": 0.7916666666666666,
+      "revert_count": 5,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.11249999999999993,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 40.7,
+      "adaptation_delay_r2": 5,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        12,
+        0,
+        0,
+        11,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.2069,
+      "theta_norms": [
+        2.9427,
+        0.0,
+        0.0,
+        1.7664,
+        0.3103,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_increase_allowance"
+      ]
+    },
+    "d_linucb": {
+      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      "cumulative_reward": 66.0,
+      "mean_reward": 2.75,
+      "success_rate": 0.875,
+      "revert_count": 3,
+      "regime1_mean": 2.6750000000000003,
+      "regime2_mean": 2.6875,
+      "regime3_mean": 2.8875,
+      "post_shift_cumulative": 44.599999999999994,
+      "adaptation_delay_r2": 3,
+      "adaptation_delay_r3": 5,
+      "arm_counts": [
+        5,
+        2,
+        11,
+        4,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 2.099,
+      "theta_norms": [
+        0.1642,
+        0.1545,
+        0.6177,
+        1.1015,
+        0.1063,
+        0.0618
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via member_transfer_peer",
+        "Regime-3 Emergency/Restructuring action executed via member_increase_allowance"
+      ]
+    }
+  },
+  {
+    "id": "SC-02",
+    "contract": "DrawTT",
+    "file": "DrawTT-0x02D33D35.sol",
+    "category": "Escrow_PullPayment_Vault",
+    "description": "Custodial NFT & PullPayment escrow contract with dynamic mint fee and async escrow settlement",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 10,
+      "block_jitter_events": 5,
+      "congestion_poke_events": 1
+    },
+    "linucb": {
+      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "cumulative_reward": 70.6,
+      "mean_reward": 2.9416666666666664,
+      "success_rate": 0.75,
+      "revert_count": 6,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.575,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 37.0,
+      "adaptation_delay_r2": 6,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        13,
+        0,
+        0,
+        10,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.1964,
+      "theta_norms": [
+        3.2911,
+        0.0,
+        0.0,
+        1.7985,
+        0.4086,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_set_approval_all"
+      ]
+    },
+    "d_linucb": {
+      "address": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+      "cumulative_reward": 63.5,
+      "mean_reward": 2.6458333333333335,
+      "success_rate": 0.7916666666666666,
+      "revert_count": 5,
+      "regime1_mean": 4.2,
+      "regime2_mean": 2.9,
+      "regime3_mean": 0.8375,
+      "post_shift_cumulative": 29.9,
+      "adaptation_delay_r2": 2,
+      "adaptation_delay_r3": 7,
+      "arm_counts": [
+        10,
+        1,
+        9,
+        2,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 1.9288,
+      "theta_norms": [
+        0.2625,
+        0.3766,
+        0.7417,
+        1.3803,
+        0.1837,
+        0.3881
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via escrow_withdraw_payments",
+        "Regime-3 Emergency/Restructuring action executed via member_set_approval_all"
+      ]
+    }
+  },
+  {
+    "id": "SC-03",
+    "contract": "NoahSwapStake",
+    "file": "NoahSwapStake-0x0ff004b6.sol",
+    "category": "Staking_Pool_Custody",
+    "description": "Multi-asset staking custody with order ID slots, deputy renewal permissions, and ETH fallback",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 3,
+      "block_jitter_events": 8,
+      "congestion_poke_events": 3
+    },
+    "linucb": {
+      "address": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+      "cumulative_reward": 74.30000000000001,
+      "mean_reward": 3.0958333333333337,
+      "success_rate": 0.7916666666666666,
+      "revert_count": 5,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.11249999999999993,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 40.7,
+      "adaptation_delay_r2": 5,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        12,
+        0,
+        0,
+        11,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.2069,
+      "theta_norms": [
+        2.5657,
+        0.0,
+        0.0,
+        1.9468,
+        0.3458,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via deputy_set_signer"
+      ]
+    },
+    "d_linucb": {
+      "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+      "cumulative_reward": 72.6,
+      "mean_reward": 3.025,
+      "success_rate": 0.7916666666666666,
+      "revert_count": 5,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.32499999999999996,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 39.0,
+      "adaptation_delay_r2": 2,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        10,
+        1,
+        1,
+        10,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 1.8167,
+      "theta_norms": [
+        0.3186,
+        0.2398,
+        0.2229,
+        1.2273,
+        0.1869,
+        0.0852
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via deputy_set_signer"
+      ]
+    }
+  },
+  {
+    "id": "SC-04",
+    "contract": "PyramidToken",
+    "file": "PyramidToken-0xbc69f076.sol",
+    "category": "Liquidity_Pyramid_Vault",
+    "description": "Tiered staking & liquidity vault with 30-day lockup maturity, referral bonus, and burn mechanics",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 8,
+      "block_jitter_events": 6,
+      "congestion_poke_events": 5
+    },
+    "linucb": {
+      "address": "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1",
+      "cumulative_reward": 52.6,
+      "mean_reward": 2.191666666666667,
+      "success_rate": 0.75,
+      "revert_count": 6,
+      "regime1_mean": 0.525,
+      "regime2_mean": 0.8500000000000001,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 48.400000000000006,
+      "adaptation_delay_r2": 4,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        3,
+        3,
+        1,
+        13,
+        3,
+        1
+      ],
+      "arm_entropy_bits": 1.9862,
+      "theta_norms": [
+        0.819,
+        0.1322,
+        0.3183,
+        2.7934,
+        0.158,
+        0.3176
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_burn_tokens"
+      ]
+    },
+    "d_linucb": {
+      "address": "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
+      "cumulative_reward": 54.300000000000004,
+      "mean_reward": 2.2625,
+      "success_rate": 0.75,
+      "revert_count": 6,
+      "regime1_mean": 0.525,
+      "regime2_mean": 1.0625,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 50.1,
+      "adaptation_delay_r2": 3,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        3,
+        3,
+        1,
+        14,
+        2,
+        1
+      ],
+      "arm_entropy_bits": 1.8844,
+      "theta_norms": [
+        0.1158,
+        0.0563,
+        0.1059,
+        1.29,
+        0.0816,
+        0.1528
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_burn_tokens"
+      ]
+    }
+  },
+  {
+    "id": "SC-05",
+    "contract": "THREEAMIGOSCAPITAL",
+    "file": "THREEAMIGOSCAPITAL-0x5bf05c34.sol",
+    "category": "Staking_Treasury",
+    "description": "Capital staking treasury with lockup penalty before maturity, reward multiplier, and AMM limits",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 8,
+      "block_jitter_events": 7,
+      "congestion_poke_events": 5
+    },
+    "linucb": {
+      "address": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+      "cumulative_reward": 33.4,
+      "mean_reward": 1.3916666666666666,
+      "success_rate": 0.875,
+      "revert_count": 3,
+      "regime1_mean": 1.9125,
+      "regime2_mean": 1.9125,
+      "regime3_mean": 0.35,
+      "post_shift_cumulative": 18.1,
+      "adaptation_delay_r2": 0,
+      "adaptation_delay_r3": 8,
+      "arm_counts": [
+        8,
+        1,
+        8,
+        1,
+        5,
+        1
+      ],
+      "arm_entropy_bits": 2.1012,
+      "theta_norms": [
+        1.3375,
+        0.2421,
+        2.2964,
+        0.1642,
+        0.3048,
+        0.3631
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via member_unstake_claim"
+      ]
+    },
+    "d_linucb": {
+      "address": "0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD",
+      "cumulative_reward": 56.400000000000006,
+      "mean_reward": 2.35,
+      "success_rate": 0.875,
+      "revert_count": 3,
+      "regime1_mean": 2.2875,
+      "regime2_mean": -0.43749999999999994,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 38.10000000000001,
+      "adaptation_delay_r2": 3,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        3,
+        6,
+        2,
+        10,
+        2,
+        1
+      ],
+      "arm_entropy_bits": 2.1898,
+      "theta_norms": [
+        0.0982,
+        0.2275,
+        0.1639,
+        1.2523,
+        0.0976,
+        0.1869
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_transfer_shares"
+      ]
+    }
+  },
+  {
+    "id": "SC-06",
+    "contract": "PymeStaking",
+    "file": "PymeStaking-0x90b8fbb7.sol",
+    "category": "TimeLocked_Staking_Custody",
+    "description": "Upgradeable staking custody with lockup tiers, premature unlock, and claim gates",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 5,
+      "block_jitter_events": 7,
+      "congestion_poke_events": 3
+    },
+    "linucb": {
+      "address": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
+      "cumulative_reward": 13.3,
+      "mean_reward": 0.5541666666666667,
+      "success_rate": 0.375,
+      "revert_count": 15,
+      "regime1_mean": 4.2,
+      "regime2_mean": -1.0375,
+      "regime3_mean": -1.5,
+      "post_shift_cumulative": -20.3,
+      "adaptation_delay_r2": 6,
+      "adaptation_delay_r3": 3,
+      "arm_counts": [
+        14,
+        1,
+        1,
+        6,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 1.7178,
+      "theta_norms": [
+        3.6565,
+        0.3552,
+        0.3552,
+        0.4218,
+        0.359,
+        0.3552
+      ],
+      "anomalies": []
+    },
+    "d_linucb": {
+      "address": "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901",
+      "cumulative_reward": 19.6,
+      "mean_reward": 0.8166666666666668,
+      "success_rate": 0.4166666666666667,
+      "revert_count": 14,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.25,
+      "regime3_mean": -1.5,
+      "post_shift_cumulative": -14.0,
+      "adaptation_delay_r2": 2,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        12,
+        2,
+        4,
+        3,
+        2,
+        1
+      ],
+      "arm_entropy_bits": 2.0944,
+      "theta_norms": [
+        0.7047,
+        0.3537,
+        0.3609,
+        0.3332,
+        0.3375,
+        0.2761
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via member_claim_mature"
+      ]
+    }
+  },
+  {
+    "id": "SC-07",
+    "contract": "Token",
+    "file": "Token-0x7c81418a.sol",
+    "category": "Liquidity_Vault_Token",
+    "description": "Taxed liquidity token vault with public ETH flush, bot blacklist filter, and fee-bearing transfers",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 5,
+      "block_jitter_events": 8,
+      "congestion_poke_events": 6
+    },
+    "linucb": {
+      "address": "0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d",
+      "cumulative_reward": 74.30000000000001,
+      "mean_reward": 3.0958333333333337,
+      "success_rate": 0.7916666666666666,
+      "revert_count": 5,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.11249999999999993,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 40.7,
+      "adaptation_delay_r2": 5,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        12,
+        0,
+        0,
+        11,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.2069,
+      "theta_norms": [
+        3.2452,
+        0.0,
+        0.0,
+        1.756,
+        0.3126,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_approve_spender"
+      ]
+    },
+    "d_linucb": {
+      "address": "0x34B40BA116d5Dec75548a9e9A8f15411461E8c70",
+      "cumulative_reward": 94.86499999998668,
+      "mean_reward": 3.952708333332778,
+      "success_rate": 0.9166666666666666,
+      "revert_count": 2,
+      "regime1_mean": 2.9875000000000003,
+      "regime2_mean": 4.507499999999391,
+      "regime3_mean": 4.363124999998945,
+      "post_shift_cumulative": 70.96499999998669,
+      "adaptation_delay_r2": 3,
+      "adaptation_delay_r3": 8,
+      "arm_counts": [
+        6,
+        1,
+        14,
+        1,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 1.7178,
+      "theta_norms": [
+        0.385,
+        0.0991,
+        1.1095,
+        0.0565,
+        0.1062,
+        0.0673
+      ],
+      "anomalies": [
+        "Extracted +0.247 ETH on-chain via public_withdraw_tax_eth",
+        "Extracted +0.272 ETH on-chain via public_withdraw_tax_eth",
+        "Extracted +0.334 ETH on-chain via public_withdraw_tax_eth",
+        "Regime-2 Maturity/Settlement yield captured via public_withdraw_tax_eth",
+        "SECURITY FINDING: Member EOA executed sensitive function 'public_withdraw_tax_eth' (withdraw())"
+      ]
+    }
+  },
+  {
+    "id": "SC-08",
+    "contract": "ADWGenerator",
+    "file": "ADWGenerator-0x544D5a9a.sol",
+    "category": "Fee_Custody_Vault",
+    "description": "Tiered fee custody vault where creation fees dynamically adjust across protocol phases",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 8,
+      "block_jitter_events": 7,
+      "congestion_poke_events": 4
+    },
+    "linucb": {
+      "address": "0x5bf5b11053e734690269C6B9D438F8C9d48F528A",
+      "cumulative_reward": -20.3,
+      "mean_reward": -0.8458333333333333,
+      "success_rate": 0.25,
+      "revert_count": 18,
+      "regime1_mean": 0.46249999999999997,
+      "regime2_mean": -1.5,
+      "regime3_mean": -1.5,
+      "post_shift_cumulative": -24.0,
+      "adaptation_delay_r2": 0,
+      "adaptation_delay_r3": 2,
+      "arm_counts": [
+        2,
+        1,
+        13,
+        5,
+        2,
+        1
+      ],
+      "arm_entropy_bits": 1.9302,
+      "theta_norms": [
+        0.3703,
+        0.3519,
+        2.1222,
+        0.9923,
+        0.3612,
+        0.3519
+      ],
+      "anomalies": []
+    },
+    "d_linucb": {
+      "address": "0x38a024C0b412B9d1db8BC398140D00F5Af3093D4",
+      "cumulative_reward": -8.299999999999999,
+      "mean_reward": -0.34583333333333327,
+      "success_rate": 0.25,
+      "revert_count": 18,
+      "regime1_mean": 1.9625000000000001,
+      "regime2_mean": -1.5,
+      "regime3_mean": -1.5,
+      "post_shift_cumulative": -24.0,
+      "adaptation_delay_r2": 3,
+      "adaptation_delay_r3": 4,
+      "arm_counts": [
+        3,
+        10,
+        3,
+        3,
+        3,
+        2
+      ],
+      "arm_entropy_bits": 2.325,
+      "theta_norms": [
+        0.3455,
+        0.4441,
+        0.3082,
+        0.33,
+        0.3491,
+        0.3181
+      ],
+      "anomalies": []
+    }
+  },
+  {
+    "id": "SC-09",
+    "contract": "AAMG",
+    "file": "AAMG-0x637aaa9c.sol",
+    "category": "Pool_Custody_Mint",
+    "description": "USDT-backed pool custody with dynamic ticket supply, mint pricing, and NFT approvals",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 5,
+      "block_jitter_events": 6,
+      "congestion_poke_events": 6
+    },
+    "linucb": {
+      "address": "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf",
+      "cumulative_reward": 70.6,
+      "mean_reward": 2.9416666666666664,
+      "success_rate": 0.75,
+      "revert_count": 6,
+      "regime1_mean": 4.2,
+      "regime2_mean": -0.575,
+      "regime3_mean": 5.2,
+      "post_shift_cumulative": 37.0,
+      "adaptation_delay_r2": 6,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        13,
+        0,
+        0,
+        10,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.1964,
+      "theta_norms": [
+        3.2911,
+        0.0,
+        0.0,
+        1.7985,
+        0.4086,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via member_transfer_nft"
+      ]
+    },
+    "d_linucb": {
+      "address": "0xfcDB4564c18A9134002b9771816092C9693622e3",
+      "cumulative_reward": 63.5,
+      "mean_reward": 2.6458333333333335,
+      "success_rate": 0.7916666666666666,
+      "revert_count": 5,
+      "regime1_mean": 4.2,
+      "regime2_mean": 2.9,
+      "regime3_mean": 0.8375,
+      "post_shift_cumulative": 29.9,
+      "adaptation_delay_r2": 2,
+      "adaptation_delay_r3": 7,
+      "arm_counts": [
+        10,
+        1,
+        9,
+        2,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 1.9288,
+      "theta_norms": [
+        0.2625,
+        0.3766,
+        0.7417,
+        1.3803,
+        0.1837,
+        0.3881
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via member_set_approval_all",
+        "Regime-3 Emergency/Restructuring action executed via member_transfer_nft"
+      ]
+    }
+  },
+  {
+    "id": "SC-10",
+    "contract": "Shuffle",
+    "file": "Shuffle-0x137110Eb.sol",
+    "category": "Liquidity_Pool_Lottery",
+    "description": "Custodial bidding room pool with time-locked bid withdrawal and unprotected room modification",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 10,
+      "block_jitter_events": 5,
+      "congestion_poke_events": 5
+    },
+    "linucb": {
+      "address": "0x5302E909d1e93e30F05B5D6Eea766363D14F9892",
+      "cumulative_reward": 99.10000000000001,
+      "mean_reward": 4.129166666666667,
+      "success_rate": 0.9583333333333334,
+      "revert_count": 1,
+      "regime1_mean": 4.2,
+      "regime2_mean": 0.48750000000000004,
+      "regime3_mean": 7.7,
+      "post_shift_cumulative": 65.5,
+      "adaptation_delay_r2": 6,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        13,
+        0,
+        0,
+        10,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.1964,
+      "theta_norms": [
+        3.5106,
+        0.0,
+        0.0,
+        1.8044,
+        0.3592,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via unprotected_modify_room2",
+        "SECURITY FINDING: Member EOA executed sensitive function 'unprotected_modify_room2' (modifyRoom(uint256,bool,uint256,address))"
+      ]
+    },
+    "d_linucb": {
+      "address": "0xefc1aB2475ACb7E60499Efb171D173be19928a05",
+      "cumulative_reward": 121.10000000000001,
+      "mean_reward": 5.045833333333333,
+      "success_rate": 0.9583333333333334,
+      "revert_count": 1,
+      "regime1_mean": 4.2,
+      "regime2_mean": 3.2375000000000003,
+      "regime3_mean": 7.7,
+      "post_shift_cumulative": 87.5,
+      "adaptation_delay_r2": 2,
+      "adaptation_delay_r3": 0,
+      "arm_counts": [
+        9,
+        0,
+        0,
+        14,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.1753,
+      "theta_norms": [
+        0.6273,
+        0.0,
+        0.0,
+        1.8471,
+        0.1869,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-3 Emergency/Restructuring action executed via unprotected_modify_room2",
+        "SECURITY FINDING: Member EOA executed sensitive function 'unprotected_modify_room2' (modifyRoom(uint256,bool,uint256,address))"
+      ]
+    }
+  },
+  {
+    "id": "SC-11",
+    "contract": "Airdrop",
+    "file": "Airdrop-0x897b328c.sol",
+    "category": "Custodial_Merkle_Airdrop",
+    "description": "Merkle-verified token distribution custody with single-claim lock and underlying token operations",
+    "rounds": 24,
+    "network_events_summary": {
+      "peer_liquidity_events": 10,
+      "block_jitter_events": 6,
+      "congestion_poke_events": 4
+    },
+    "linucb": {
+      "address": "0x66F625B8c4c635af8b74ECe2d7eD0D58b4af3C3d",
+      "cumulative_reward": 54.4,
+      "mean_reward": 2.2666666666666666,
+      "success_rate": 0.875,
+      "revert_count": 3,
+      "regime1_mean": 0.5,
+      "regime2_mean": 4.8,
+      "regime3_mean": 1.5,
+      "post_shift_cumulative": 50.4,
+      "adaptation_delay_r2": 0,
+      "adaptation_delay_r3": 8,
+      "arm_counts": [
+        3,
+        0,
+        19,
+        1,
+        1,
+        0
+      ],
+      "arm_entropy_bits": 1.0239,
+      "theta_norms": [
+        0.8205,
+        0.0,
+        0.7536,
+        0.1667,
+        0.3585,
+        0.0
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via member_token_transfer"
+      ]
+    },
+    "d_linucb": {
+      "address": "0xA56F946D6398Dd7d9D4D9B337Cf9E0F68982ca5B",
+      "cumulative_reward": 62.800000000000004,
+      "mean_reward": 2.6166666666666667,
+      "success_rate": 0.8333333333333334,
+      "revert_count": 4,
+      "regime1_mean": 0.1625,
+      "regime2_mean": 4.8,
+      "regime3_mean": 2.8875,
+      "post_shift_cumulative": 61.5,
+      "adaptation_delay_r2": 0,
+      "adaptation_delay_r3": 5,
+      "arm_counts": [
+        2,
+        1,
+        15,
+        4,
+        1,
+        1
+      ],
+      "arm_entropy_bits": 1.7265,
+      "theta_norms": [
+        0.071,
+        0.1151,
+        0.7339,
+        1.3006,
+        0.0734,
+        0.1318
+      ],
+      "anomalies": [
+        "Regime-2 Maturity/Settlement yield captured via member_token_transfer",
+        "Regime-3 Emergency/Restructuring action executed via member_token_approve"
+      ]
+    }
+  }
+]

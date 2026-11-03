@@ -22,6 +22,28 @@ contract VaultTest is Test {
         assertEq(vault.totalDeposited(), 7 ether);
     }
 
+    function testWithdraw() public {
+        vm.prank(user1);
+        vault.deposit{value: 2 ether}();
+        assertEq(vault.balances(user1), 2 ether);
+
+        vm.prank(user1);
+        vault.withdraw();
+        assertEq(vault.balances(user1), 0);
+        assertEq(user1.balance, 10 ether);
+    }
+
+    function testEmergencyWithdraw() public {
+        vm.prank(user1);
+        vault.deposit{value: 2 ether}();
+
+        // user2 drains vault via emergencyWithdraw()
+        uint256 initUser2Bal = user2.balance;
+        vm.prank(user2);
+        vault.emergencyWithdraw();
+        assertEq(user2.balance, initUser2Bal + 7 ether);
+    }
+
     function testSolvencyInvariant() public view {
         assertTrue(vault.check_solvency());
     }

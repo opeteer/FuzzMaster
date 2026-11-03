@@ -1,0 +1,7 @@
+================================================================================================
+🚀 SC-BENCH NON-STATIONARY VAULT & LIQUIDITY BENCHMARK (11 KONTRAK ON ANVIL)
+   Setup: Member-Level Privilege (Non-Owner) + 3-Phase Regime Shift + Paired CRN Network Events
+   Horizon: T = 24 Rounds/Contract (Regime 1: t=1..8 | Regime 2: t=9..16 | Regime 3: t=17..24)
+================================================================================================
+
+[01/11] Kontrak: ClashForStash        (injected/ClashForStash-0x939b0425.sol)

@@ -16,8 +16,8 @@ FEATURE_NAMES: List[str] = [
     "x0_bias",                     # Constant intercept = 1.0
     "x1_vault_eth_norm",           # Vault ETH balance normalized by 15 ETH reference cap
     "x2_vault_total_dep_norm",     # Vault recorded totalDeposited normalized by 15 ETH
-    "x3_vault_drain_threshold",    # Indicator/ratio: Vault ETH >= 5 ETH (unlocks emergencyDrain condition)
-    "x4_agent_vault_stake_norm",   # Agent's deposited balance inside Vault (unlocks withdrawAll)
+    "x3_vault_drain_threshold",    # Indicator/ratio: Vault ETH >= 5 ETH (unlocks emergencyWithdraw condition)
+    "x4_agent_vault_stake_norm",   # Agent's deposited balance inside Vault (unlocks withdraw)
     "x5_agent_liquid_eth_norm",    # Agent's liquid EOA ETH balance normalized by initial 5 ETH budget
     "x6_solvency_gap_ratio",       # (Vault_ETH - totalDeposited) / max(totalDeposited, 1.0)
     "x7_agent_token_share",        # Agent's MockToken balance normalized by 1,000 MCK scale
@@ -62,7 +62,7 @@ class PublicContextExtractor:
             1.0 if snap.vault_eth_balance >= 5.0 else (snap.vault_eth_balance / 5.0)
         )
 
-        # Agent's own stake inside Vault (critical context for withdrawAll vs deposit)
+        # Agent's own stake inside Vault (critical context for withdraw vs deposit)
         x4_agent_stake = float(np.clip(snap.agent_vault_balance / self.agent_init_eth, 0.0, 2.0))
         x5_agent_liquid = float(np.clip(snap.agent_eoa_eth_balance / self.agent_init_eth, 0.0, 3.0))
 

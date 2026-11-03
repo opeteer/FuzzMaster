@@ -127,7 +127,7 @@ class VaultCustodyEnv(BaseUnprivilegedBanditEnv):
             else self.token_address
         )
         call_args: List[str] = []
-        if arm.function_sig == "emergencyDrain(address)":
+        if arm.function_sig in ("emergencyDrain(address)", "emergencyWithdraw(address)"):
             call_args.append(self.rpc_client.agent_address)
         elif arm.function_sig == "mint(address,uint256)":
             call_args.extend([self.rpc_client.agent_address, str(int(250 * 1e18))])

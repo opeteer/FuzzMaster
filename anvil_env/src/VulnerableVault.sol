@@ -32,23 +32,51 @@ contract VulnerableVault {
     }
 
     /// @notice Vulnerable withdraw function: state updated AFTER external call (Classic Reentrancy)
-    function withdrawAll() external {
-        uint256 balance = balances[msg.sender];
-        require(balance > 0, "No balance");
-
-        // External call before state update
-        (bool success, ) = msg.sender.call{value: balance}("");
-        require(success, "Transfer failed");
-
-        balances[msg.sender] = 0;
-        totalDeposited -= balance;
-
-        emit Withdrawn(msg.sender, balance);
+    /// Follows SC-Bench Vault_and_Liquidity dataset standard naming (`withdraw`)
+    function withdraw() external {
+        _withdraw(balances[msg.sender]);
     }
 
-    /// @notice Insecure emergency drain / kill
+    /// @notice Parameterized withdraw variant following SC-Bench Vault_and_Liquidity dataset
+    function withdraw(uint256 amount) external {
+        _withdraw(amount);
+    }
+
+    /// @notice Backward compatibility alias
+    function withdrawAll() external {
+        _withdraw(balances[msg.sender]);
+    }
+
+    function _withdraw(uint256 amount) internal {
+        require(amount > 0, "No balance");
+        require(balances[msg.sender] >= amount, "Insufficient user balance");
+
+        // External call before state update
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+
+        balances[msg.sender] -= amount;
+        totalDeposited -= amount;
+
+        emit Withdrawn(msg.sender, amount);
+    }
+
+    /// @notice Insecure emergency withdraw following SC-Bench Vault_and_Liquidity dataset standard
+    function emergencyWithdraw() external {
+        _emergencyWithdraw(payable(msg.sender));
+    }
+
+    function emergencyWithdraw(address payable recipient) external {
+        _emergencyWithdraw(recipient);
+    }
+
+    /// @notice Backward compatibility alias for emergencyWithdraw
     function emergencyDrain(address payable recipient) external {
-        // Flawed condition: anyone can call if contract balance exceeds 10 ether or if caller sends matching secret
+        _emergencyWithdraw(recipient);
+    }
+
+    function _emergencyWithdraw(address payable recipient) internal {
+        // Flawed condition: anyone can call if contract balance exceeds 5 ether or if caller is owner
         require(recipient != address(0), "Invalid recipient");
         require(address(this).balance >= 5 ether || msg.sender == owner, "Unauthorized");
 

@@ -106,26 +106,26 @@ def main():
     print("🛡️ [FASE 4] UJI PERCOBAAN KERENTANAN & EVALUASI KEAMANAN")
     print("-"*75)
 
-    # Percobaan A: Agen mencoba memanggil emergencyDrain (tanpa hak owner)
-    print("[*] Percobaan A: Agen mencoba memanggil emergencyDrain() secara ilegal...")
+    # Percobaan A: Agen mencoba memanggil emergencyWithdraw (tanpa hak owner & saldo < 5 ETH)
+    print("[*] Percobaan A: Agen mencoba memanggil emergencyWithdraw() secara ilegal...")
     drain_out, drain_err, drain_code = run_cmd(
-        f"{CAST_BIN} send {vault_addr} 'emergencyDrain(address)' {AGENT_ADDR} "
+        f"{CAST_BIN} send {vault_addr} 'emergencyWithdraw()' "
         f"--private-key {AGENT_PK} --rpc-url {RPC_URL}"
     )
     if drain_code != 0:
         print("[✓] HASIL: Transaksi DITOLAK oleh Anvil EVM!")
         print("    - Alasan Revert: Unauthorized access (Ketiadaan hak istimewa terbukti efektif)")
     else:
-        print("[!] Peringatan: emergencyDrain berhasil terpanggil.")
+        print("[!] Peringatan: emergencyWithdraw berhasil terpanggil.")
 
-    # Percobaan B: Agen menarik dana melalui withdrawAll()
-    print("\n[*] Percobaan B: Agen memicu withdrawAll() untuk menguji alur penarikan dana...")
+    # Percobaan B: Agen menarik dana melalui withdraw()
+    print("\n[*] Percobaan B: Agen memicu withdraw() untuk menguji alur penarikan dana...")
     w_out, _, w_code = run_cmd(
-        f"{CAST_BIN} send {vault_addr} 'withdrawAll()' "
+        f"{CAST_BIN} send {vault_addr} 'withdraw()' "
         f"--private-key {AGENT_PK} --rpc-url {RPC_URL}"
     )
     if w_code == 0:
-        print("[✓] HASIL: Transaksi withdrawAll() berhasil dieksekusi!")
+        print("[✓] HASIL: Transaksi withdraw() berhasil dieksekusi!")
         print(f"    - Saldo Kas Agen Pulih : {get_balance(AGENT_ADDR):.4f} ETH")
         print(f"    - Saldo Akhir Vault    : {get_balance(vault_addr):.4f} ETH")
 
