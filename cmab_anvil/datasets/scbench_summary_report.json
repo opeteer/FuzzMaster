@@ -1,0 +1,41 @@
+{
+  "dataset": "SC-Bench Categorized Dataset",
+  "output_root": "/home/opeteer/FuzzMaster/SC-Bench/categorized_dataset",
+  "categories": {
+    "Vault_and_Liquidity": {
+      "folder": "/home/opeteer/FuzzMaster/SC-Bench/categorized_dataset/Vault_and_Liquidity",
+      "injected_contracts": 1094,
+      "origin_contracts": 1672,
+      "audited_contracts": 5,
+      "total_contracts": 2771
+    },
+    "AMM_and_DEX_Agent": {
+      "folder": "/home/opeteer/FuzzMaster/SC-Bench/categorized_dataset/AMM_and_DEX_Agent",
+      "injected_contracts": 5664,
+      "origin_contracts": 6228,
+      "audited_contracts": 0,
+      "total_contracts": 11892
+    },
+    "Lending_and_Borrowing_Agent": {
+      "folder": "/home/opeteer/FuzzMaster/SC-Bench/categorized_dataset/Lending_and_Borrowing_Agent",
+      "injected_contracts": 11,
+      "origin_contracts": 41,
+      "audited_contracts": 0,
+      "total_contracts": 52
+    },
+    "Governance_and_Access_Control_Agent": {
+      "folder": "/home/opeteer/FuzzMaster/SC-Bench/categorized_dataset/Governance_and_Access_Control_Agent",
+      "injected_contracts": 918,
+      "origin_contracts": 1250,
+      "audited_contracts": 6,
+      "total_contracts": 2174
+    },
+    "Others_Remaining": {
+      "folder": "/home/opeteer/FuzzMaster/SC-Bench/categorized_dataset/Others_Remaining",
+      "injected_contracts": 321,
+      "origin_contracts": 638,
+      "audited_contracts": 19,
+      "total_contracts": 978
+    }
+  }
+}
